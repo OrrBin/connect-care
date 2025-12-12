@@ -1,12 +1,15 @@
 import { useContacts } from '@/hooks/useContacts';
+import { useNotifications } from '@/hooks/useNotifications';
 import { AddContactDialog } from '@/components/AddContactDialog';
 import { ContactCard } from '@/components/ContactCard';
 import { EmptyState } from '@/components/EmptyState';
+import { NotificationPrompt } from '@/components/NotificationPrompt';
 import { useToast } from '@/hooks/use-toast';
 import { Heart } from 'lucide-react';
 
 const Index = () => {
   const { contacts, addContact, markAsContacted, deleteContact } = useContacts();
+  const { permission, requestPermission, isSupported } = useNotifications(contacts);
   const { toast } = useToast();
 
   const handleAdd = (name: string, frequency: any, notes?: string) => {
@@ -56,8 +59,14 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="container max-w-3xl mx-auto px-4 py-8">
+      <main className="container max-w-3xl mx-auto px-4 py-8 space-y-6">
+        {isSupported && (
+          <NotificationPrompt 
+            permission={permission} 
+            onRequestPermission={requestPermission} 
+          />
+        )}
+
         {contacts.length === 0 ? (
           <EmptyState />
         ) : (
