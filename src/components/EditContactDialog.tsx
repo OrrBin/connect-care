@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/RichTextEditor';
 import {
   Select,
   SelectContent,
@@ -24,13 +25,14 @@ import { format, parseISO } from 'date-fns';
 
 interface EditContactDialogProps {
   contact: Contact;
-  onEdit: (id: string, updates: { name: string; frequency: ReminderFrequency; nextReminder: string }) => void;
+  onEdit: (id: string, updates: { name: string; frequency: ReminderFrequency; nextReminder: string; notes?: string }) => void;
 }
 
 export function EditContactDialog({ contact, onEdit }: EditContactDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(contact.name);
   const [frequency, setFrequency] = useState<ReminderFrequency>(contact.frequency);
+  const [notes, setNotes] = useState(contact.notes || '');
   const [nextReminder, setNextReminder] = useState(
     format(parseISO(contact.nextReminder), "yyyy-MM-dd'T'HH:mm")
   );
@@ -43,6 +45,7 @@ export function EditContactDialog({ contact, onEdit }: EditContactDialogProps) {
       name: name.trim(),
       frequency,
       nextReminder: new Date(nextReminder).toISOString(),
+      notes: notes.trim() || undefined,
     });
     setOpen(false);
   };
@@ -86,6 +89,14 @@ export function EditContactDialog({ contact, onEdit }: EditContactDialogProps) {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <RichTextEditor
+                value={notes}
+                onChange={setNotes}
+                placeholder="Add notes about this contact..."
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="nextReminder">Next Reminder</Label>

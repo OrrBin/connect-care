@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/RichTextEditor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReminderFrequency, frequencyLabels } from '@/types/contact';
 import { Plus } from 'lucide-react';
@@ -71,12 +71,10 @@ export function AddContactDialog({ onAdd }: AddContactDialogProps) {
           
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (optional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Topics to discuss, shared interests..."
+            <RichTextEditor
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
+              onChange={setNotes}
+              placeholder="Topics to discuss, shared interests..."
             />
           </div>
           

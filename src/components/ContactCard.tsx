@@ -14,11 +14,12 @@ interface ContactCardProps {
   contact: Contact;
   onMarkContacted: (id: string) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, updates: { name: string; frequency: ReminderFrequency; nextReminder: string }) => void;
+  onEdit: (id: string, updates: { name: string; frequency: ReminderFrequency; nextReminder: string; notes?: string }) => void;
 }
 
 export function ContactCard({ contact, onMarkContacted, onDelete, onEdit }: ContactCardProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const status = getReminderStatus(contact);
   const reminderDate = parseISO(contact.nextReminder);
   
@@ -86,9 +87,19 @@ export function ContactCard({ contact, onMarkContacted, onDelete, onEdit }: Cont
               </div>
               
               {contact.notes && (
-                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                  {contact.notes}
-                </p>
+                <div 
+                  className={cn(
+                    "text-sm text-muted-foreground mt-2 prose prose-sm max-w-none cursor-pointer hover:text-foreground transition-colors",
+                    "[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_li]:ml-2",
+                    "[&_strong]:font-bold [&_em]:italic [&_s]:line-through",
+                    "[&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-2 [&_h2]:mb-1",
+                    "[&_blockquote]:border-l-2 [&_blockquote]:border-muted [&_blockquote]:pl-3 [&_blockquote]:italic",
+                    "[&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono",
+                    !notesExpanded && "line-clamp-3"
+                  )}
+                  dangerouslySetInnerHTML={{ __html: contact.notes }}
+                  onClick={() => setNotesExpanded(!notesExpanded)}
+                />
               )}
               
               <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">

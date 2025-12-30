@@ -20,7 +20,7 @@ const Index = () => {
     });
   };
 
-  const handleEdit = (id: string, updates: { name: string; frequency: any; nextReminder: string }) => {
+  const handleEdit = (id: string, updates: { name: string; frequency: any; nextReminder: string; notes?: string }) => {
     updateContact(id, updates);
     toast({
       title: 'Contact updated',
