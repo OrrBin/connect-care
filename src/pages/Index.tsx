@@ -76,12 +76,11 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="space-y-3">
-              {contacts.map((contact, index) => (
+            <div className="space-y-3 transition-all duration-500">
+              {contacts.map((contact) => (
                 <div 
                   key={contact.id} 
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className="transition-all duration-500 ease-out"
                 >
                   <ContactCard
                     contact={contact}

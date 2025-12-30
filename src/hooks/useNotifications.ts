@@ -63,12 +63,18 @@ export function useNotifications(contacts: Contact[]) {
     if (permission !== 'granted' || contacts.length === 0) return;
 
     // Check immediately
+    console.log('Checking for due contacts...', contacts.length);
     checkAndNotifyDueContacts(contacts);
 
-    // Check every hour
+    // Determine check interval based on contact frequencies
+    const hasMinuteFrequency = contacts.some(c => c.frequency === 'minute' || c.frequency === 'fiveMinutes');
+    const checkInterval = hasMinuteFrequency ? 10 * 1000 : 60 * 60 * 1000; // 10 seconds if minute-based, else 1 hour
+
+    console.log('Setting up notification check interval:', checkInterval / 1000, 'seconds');
     const interval = setInterval(() => {
+      console.log('Running periodic notification check...');
       checkAndNotifyDueContacts(contacts);
-    }, 60 * 60 * 1000);
+    }, checkInterval);
 
     return () => clearInterval(interval);
   }, [contacts, permission]);

@@ -21,6 +21,13 @@ export function useContacts() {
 
   useEffect(() => {
     loadContacts();
+    
+    // Refresh contacts every 10 seconds to update status badges in sync with notifications
+    const interval = setInterval(() => {
+      loadContacts();
+    }, 10 * 1000);
+    
+    return () => clearInterval(interval);
   }, [loadContacts]);
 
   const addContact = useCallback((name: string, frequency: ReminderFrequency, notes?: string) => {

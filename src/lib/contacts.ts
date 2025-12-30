@@ -1,9 +1,18 @@
 import { Contact, ReminderFrequency, frequencyDays } from '@/types/contact';
-import { addDays, parseISO, isBefore, startOfDay, isToday } from 'date-fns';
+import { addDays, addMinutes, parseISO, isBefore, startOfDay, isToday } from 'date-fns';
 
 const STORAGE_KEY = 'keepintouch-contacts';
 
 export function generateRandomReminderDate(frequency: ReminderFrequency, fromDate: Date = new Date()): string {
+  // Handle minute-based frequencies
+  if (frequency === 'minute') {
+    return addMinutes(fromDate, 1).toISOString();
+  }
+  if (frequency === 'fiveMinutes') {
+    return addMinutes(fromDate, 5).toISOString();
+  }
+  
+  // Handle day-based frequencies
   const { min, max } = frequencyDays[frequency];
   const randomDays = Math.floor(Math.random() * (max - min + 1)) + min;
   return addDays(startOfDay(fromDate), randomDays).toISOString();
@@ -78,14 +87,28 @@ export function markAsContacted(id: string): Contact | null {
 }
 
 export function getReminderStatus(contact: Contact): 'overdue' | 'today' | 'upcoming' | 'future' {
-  const reminderDate = startOfDay(parseISO(contact.nextReminder));
-  const today = startOfDay(new Date());
+  const reminderDate = parseISO(contact.nextReminder);
+  const now = new Date();
   
-  if (isBefore(reminderDate, today)) return 'overdue';
+  // For minute-based frequencies, check if overdue by comparing exact times
+  if (contact.frequency === 'minute' || contact.frequency === 'fiveMinutes') {
+    if (reminderDate <= now) return 'overdue'; // Changed from < to <=
+    
+    const fiveMinutesFromNow = addMinutes(now, 5);
+    if (isBefore(reminderDate, fiveMinutesFromNow)) return 'today';
+    
+    return 'upcoming';
+  }
+  
+  // For day-based frequencies, use day comparison
+  const reminderDay = startOfDay(reminderDate);
+  const today = startOfDay(now);
+  
+  if (isBefore(reminderDay, today)) return 'overdue';
   if (isToday(reminderDate)) return 'today';
   
   const weekFromNow = addDays(today, 7);
-  if (isBefore(reminderDate, weekFromNow)) return 'upcoming';
+  if (isBefore(reminderDay, weekFromNow)) return 'upcoming';
   
   return 'future';
 }

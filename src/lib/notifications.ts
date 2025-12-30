@@ -39,41 +39,63 @@ export function sendNotification(title: string, options?: NotificationOptions): 
 }
 
 export function checkAndNotifyDueContacts(contacts: Contact[]): void {
-  const notifiedKey = 'notified_contacts_today';
-  const today = new Date().toDateString();
+  console.log('checkAndNotifyDueContacts called with', contacts.length, 'contacts');
   
-  // Get already notified contacts for today
+  const notifiedKey = 'notified_contacts';
+  
+  // Get already notified contacts with their reminder times
   const notifiedData = localStorage.getItem(notifiedKey);
-  const notified: { date: string; ids: string[] } = notifiedData 
-    ? JSON.parse(notifiedData) 
-    : { date: today, ids: [] };
+  const notified: Record<string, string> = notifiedData ? JSON.parse(notifiedData) : {};
   
-  // Reset if it's a new day
-  if (notified.date !== today) {
-    notified.date = today;
-    notified.ids = [];
-  }
-
+  const now = new Date();
+  console.log('Current time:', now.toISOString());
+  
   const dueContacts = contacts.filter(contact => {
     const status = getReminderStatus(contact);
-    return (status === 'overdue' || status === 'today') && !notified.ids.includes(contact.id);
+    console.log(`Contact ${contact.name}: status=${status}, nextReminder=${contact.nextReminder}`);
+    
+    if (status !== 'overdue' && status !== 'today') return false;
+    
+    // Notify if reminder time has arrived (now >= reminderDate)
+    const reminderDate = new Date(contact.nextReminder);
+    if (reminderDate > now) {
+      console.log(`  Skipping ${contact.name} - reminder is in future`);
+      return false;
+    }
+    
+    // Check if already notified for this specific reminder time
+    const lastNotified = notified[contact.id];
+    if (lastNotified && lastNotified === contact.nextReminder) {
+      console.log(`  Skipping ${contact.name} - already notified for this reminder`);
+      return false;
+    }
+    
+    console.log(`  ${contact.name} is due for notification!`);
+    return true;
   });
+
+  console.log('Due contacts:', dueContacts.length);
 
   if (dueContacts.length > 0) {
     if (dueContacts.length === 1) {
+      console.log('Sending notification for:', dueContacts[0].name);
       sendNotification(`Time to reach out to ${dueContacts[0].name}!`, {
         body: `It's been a while since you connected. Send them a message today!`,
         tag: 'contact-reminder',
       });
     } else {
+      console.log('Sending notification for multiple contacts');
       sendNotification(`${dueContacts.length} contacts to reach out to!`, {
         body: `${dueContacts.map(c => c.name).join(', ')} are waiting to hear from you.`,
         tag: 'contact-reminder',
       });
     }
 
-    // Mark as notified
-    notified.ids.push(...dueContacts.map(c => c.id));
+    // Mark as notified with their specific reminder time
+    dueContacts.forEach(contact => {
+      notified[contact.id] = contact.nextReminder;
+    });
     localStorage.setItem(notifiedKey, JSON.stringify(notified));
+    console.log('Updated notified contacts in localStorage');
   }
 }

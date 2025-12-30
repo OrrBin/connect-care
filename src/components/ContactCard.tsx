@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { Check, Clock, User, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface ContactCardProps {
   contact: Contact;
@@ -14,6 +15,7 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
   const status = getReminderStatus(contact);
   const reminderDate = parseISO(contact.nextReminder);
   
@@ -42,11 +44,20 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
 
   const config = statusConfig[status];
 
+  const handleDone = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      onMarkContacted(contact.id);
+      setIsAnimating(false);
+    }, 600);
+  };
+
   return (
     <Card 
       className={cn(
         'transition-all duration-200 hover:shadow-card-hover animate-fade-in',
-        config.cardClass
+        config.cardClass,
+        isAnimating && 'animate-pulse scale-105 border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-200'
       )}
     >
       <CardContent className="p-5">
@@ -79,14 +90,20 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
               
               <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                 <span>
-                  Next: <span className="font-medium">{format(reminderDate, 'MMM d, yyyy')}</span>
+                  Next: <span className="font-medium">
+                    {contact.frequency === 'minute' || contact.frequency === 'fiveMinutes' 
+                      ? format(reminderDate, 'MMM d, h:mm a')
+                      : format(reminderDate, 'MMM d, yyyy')}
+                  </span>
                   {status !== 'overdue' && (
                     <span className="ml-1">({formatDistanceToNow(reminderDate, { addSuffix: true })})</span>
                   )}
                 </span>
                 {contact.lastContacted && (
                   <span>
-                    Last: {format(parseISO(contact.lastContacted), 'MMM d')}
+                    Last: {contact.frequency === 'minute' || contact.frequency === 'fiveMinutes'
+                      ? format(parseISO(contact.lastContacted), 'MMM d, h:mm a')
+                      : format(parseISO(contact.lastContacted), 'MMM d')}
                   </span>
                 )}
               </div>
@@ -96,10 +113,14 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
           <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               size="sm"
-              onClick={() => onMarkContacted(contact.id)}
-              className="gap-1.5"
+              onClick={handleDone}
+              disabled={isAnimating}
+              className={cn(
+                "gap-1.5 transition-all",
+                isAnimating && "bg-emerald-500 hover:bg-emerald-500"
+              )}
             >
-              <Check className="h-4 w-4" />
+              <Check className={cn("h-4 w-4", isAnimating && "animate-bounce")} />
               Done
             </Button>
             <Button

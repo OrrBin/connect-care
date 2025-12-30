@@ -37,6 +37,11 @@ export const NotificationPrompt = forwardRef<HTMLDivElement, NotificationPromptP
       });
     };
 
+    const handleClearNotificationHistory = () => {
+      localStorage.removeItem('notified_contacts');
+      console.log('Notification history cleared');
+    };
+
     if (permission === 'granted') {
       return (
         <Card ref={ref} className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/30">
@@ -50,10 +55,15 @@ export const NotificationPrompt = forwardRef<HTMLDivElement, NotificationPromptP
                 <p className="text-sm text-emerald-700 dark:text-emerald-300">You'll be notified when it's time to reach out</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleTestNotification}>
-              <Bell className="h-4 w-4 mr-2" />
-              Test
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleClearNotificationHistory}>
+                Reset
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleTestNotification}>
+                <Bell className="h-4 w-4 mr-2" />
+                Test
+              </Button>
+            </div>
           </CardContent>
         </Card>
       );
