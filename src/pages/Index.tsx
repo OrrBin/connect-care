@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart } from 'lucide-react';
 
 const Index = () => {
-  const { contacts, addContact, markAsContacted, deleteContact } = useContacts();
+  const { contacts, addContact, markAsContacted, deleteContact, updateContact } = useContacts();
   const { permission, requestPermission, refreshPermission } = useNotifications(contacts);
   const { toast } = useToast();
 
@@ -17,6 +17,14 @@ const Index = () => {
     toast({
       title: 'Contact added',
       description: `We'll remind you to reach out to ${name}.`,
+    });
+  };
+
+  const handleEdit = (id: string, updates: { name: string; frequency: any; nextReminder: string }) => {
+    updateContact(id, updates);
+    toast({
+      title: 'Contact updated',
+      description: 'Changes saved successfully.',
     });
   };
 
@@ -86,6 +94,7 @@ const Index = () => {
                     contact={contact}
                     onMarkContacted={handleMarkContacted}
                     onDelete={handleDelete}
+                    onEdit={handleEdit}
                   />
                 </div>
               ))}

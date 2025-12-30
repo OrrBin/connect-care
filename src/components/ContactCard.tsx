@@ -7,14 +7,17 @@ import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { Check, Clock, User, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { EditContactDialog } from './EditContactDialog';
+import type { ReminderFrequency } from '@/types/contact';
 
 interface ContactCardProps {
   contact: Contact;
   onMarkContacted: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string, updates: { name: string; frequency: ReminderFrequency; nextReminder: string }) => void;
 }
 
-export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardProps) {
+export function ContactCard({ contact, onMarkContacted, onDelete, onEdit }: ContactCardProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const status = getReminderStatus(contact);
   const reminderDate = parseISO(contact.nextReminder);
@@ -91,9 +94,7 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
               <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                 <span>
                   Next: <span className="font-medium">
-                    {contact.frequency === 'minute' || contact.frequency === 'fiveMinutes' 
-                      ? format(reminderDate, 'MMM d, h:mm a')
-                      : format(reminderDate, 'MMM d, yyyy')}
+                    {format(reminderDate, 'MMM d, yyyy h:mm a')}
                   </span>
                   {status !== 'overdue' && (
                     <span className="ml-1">({formatDistanceToNow(reminderDate, { addSuffix: true })})</span>
@@ -101,9 +102,7 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
                 </span>
                 {contact.lastContacted && (
                   <span>
-                    Last: {contact.frequency === 'minute' || contact.frequency === 'fiveMinutes'
-                      ? format(parseISO(contact.lastContacted), 'MMM d, h:mm a')
-                      : format(parseISO(contact.lastContacted), 'MMM d')}
+                    Last: {format(parseISO(contact.lastContacted), 'MMM d, yyyy h:mm a')}
                   </span>
                 )}
               </div>
@@ -111,6 +110,7 @@ export function ContactCard({ contact, onMarkContacted, onDelete }: ContactCardP
           </div>
           
           <div className="flex items-center gap-2 flex-shrink-0">
+            <EditContactDialog contact={contact} onEdit={onEdit} />
             <Button
               size="sm"
               onClick={handleDone}
