@@ -9,7 +9,7 @@ import { Heart } from 'lucide-react';
 
 const Index = () => {
   const { contacts, addContact, markAsContacted, deleteContact } = useContacts();
-  const { permission, requestPermission, isSupported } = useNotifications(contacts);
+  const { permission, requestPermission } = useNotifications(contacts);
   const { toast } = useToast();
 
   const handleAdd = (name: string, frequency: any, notes?: string) => {
@@ -60,12 +60,10 @@ const Index = () => {
       </header>
 
       <main className="container max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {isSupported && (
-          <NotificationPrompt 
-            permission={permission} 
-            onRequestPermission={requestPermission} 
-          />
-        )}
+        <NotificationPrompt 
+          permission={permission} 
+          onRequestPermission={requestPermission} 
+        />
 
         {contacts.length === 0 ? (
           <EmptyState />
