@@ -1,6 +1,7 @@
 import { Bell, BellOff, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { sendNotification } from '@/lib/notifications';
 
 interface NotificationPromptProps {
   permission: NotificationPermission | 'unsupported';
@@ -12,17 +13,30 @@ export function NotificationPrompt({ permission, onRequestPermission }: Notifica
     return null;
   }
 
+  const handleTestNotification = () => {
+    sendNotification('Test Notification! 🔔', {
+      body: 'Browser notifications are working correctly!',
+      tag: 'test-notification',
+    });
+  };
+
   if (permission === 'granted') {
     return (
       <Card className="border-emerald-200 bg-emerald-50/50">
-        <CardContent className="flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-            <Check className="h-5 w-5 text-emerald-600" />
+        <CardContent className="flex items-center justify-between gap-4 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+              <Check className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="font-medium text-emerald-900">Notifications enabled</p>
+              <p className="text-sm text-emerald-700">You'll be notified when it's time to reach out</p>
+            </div>
           </div>
-          <div>
-            <p className="font-medium text-emerald-900">Notifications enabled</p>
-            <p className="text-sm text-emerald-700">You'll be notified when it's time to reach out</p>
-          </div>
+          <Button variant="outline" size="sm" onClick={handleTestNotification}>
+            <Bell className="h-4 w-4 mr-2" />
+            Test
+          </Button>
         </CardContent>
       </Card>
     );
